@@ -68,6 +68,7 @@ details p { color: var(--muted); margin: 8px 0 2px; }
 .shots { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 6px; }
 .shots img { flex: 0 0 calc((100% - 28px) / 3); min-width: 200px; scroll-snap-align: start; border-radius: 16px; display: block; }
 img.mac { width: 100%; border-radius: 14px; margin-top: 18px; display: block; }
+video.teaser { width: 100%; aspect-ratio: 16 / 9; border-radius: 14px; margin-bottom: 18px; display: block; background: #0d1117; }
 
 footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; padding: 22px 0 40px; }
 footer .wrap { display: flex; gap: 18px; flex-wrap: wrap; }
