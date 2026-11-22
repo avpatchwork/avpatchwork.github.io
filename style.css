@@ -36,6 +36,9 @@ header.site {
 header.site .wrap { display: flex; align-items: center; gap: 12px; height: 60px; }
 header.site img { width: 32px; height: 32px; border-radius: 8px; }
 header.site .name { font-weight: 700; color: var(--text); text-decoration: none; }
+header.site .logo { display: block; line-height: 0; }
+header.site .logo img { width: auto; height: 52px; border-radius: 0; display: block; }
+
 header.site nav { margin-left: auto; display: flex; gap: 18px; font-size: 15px; }
 header.site nav a { color: var(--muted); text-decoration: none; }
 header.site nav a[aria-current="page"], header.site nav a:hover { color: var(--text); }
@@ -78,4 +81,5 @@ footer a { color: var(--muted); }
   .hero h1 { font-size: 36px; }
   .hero img { width: 92px; height: 92px; border-radius: 21px; }
   header.site nav { gap: 12px; font-size: 14px; }
+  header.site .logo img { height: 44px; }
 }
