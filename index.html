@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>AV Patchwork</title>
-<meta name="description" content="Wiring diagrams, cable lists and gear plans for AV crews. For iPhone, iPad and Mac.">
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Wiring diagrams, cable pick lists and gear plans for live-event AV crews. On Windows now; public beta for iPhone, iPad and Mac.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="AV Patchwork">
 <meta property="og:title" content="AV Patchwork">
-<meta property="og:description" content="Wiring diagrams, cable lists and gear plans for AV crews. For iPhone, iPad and Mac.">
+<meta property="og:description" content="Wiring diagrams, cable pick lists and gear plans for live-event AV crews.">
 <meta property="og:url" content="https://avpatchwork.com/">
 <meta property="og:image" content="https://avpatchwork.com/img/og.png">
 <meta property="og:image:width" content="1200">
@@ -17,44 +18,250 @@
 <link rel="canonical" href="https://avpatchwork.com/">
 <link rel="icon" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="stylesheet" href="style.css">
+<style>
+/* Layout: a patch-bay hero (headline left, an order being patched right), a "get it" rack of store rows, then the app. */
+:root {
+  --ground: #eef1f5;       /* page, faintly blue like a rack-room wall */
+  --panel: #ffffff;
+  --ink: #0f1d2e;
+  --ink-soft: #4d5b6c;
+  --rule: #d6dce5;
+  --rack: #13253b;         /* hero band: rack-panel navy */
+  --rack-ink: #e9eef5;
+  --rack-soft: #9fb0c4;
+  --live: #1f8f4e;
+  --wait: #a2690b;
+  --hdmi: #e5730d; --sdi: #2f7de1; --xlr: #d23b3b; --dmx: #c79a12; --net: #2aa39a;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "SF Pro Text", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #0c131c; --panel: #131d29; --ink: #e6ecf3; --ink-soft: #97a6b8; --rule: #233142;
+    --rack: #0f1f33; --rack-ink: #e9eef5; --rack-soft: #93a6bd; --live: #4cc07f; --wait: #e0a94a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #0c131c; --panel: #131d29; --ink: #e6ecf3; --ink-soft: #97a6b8; --rule: #233142;
+  --rack: #0f1f33; --rack-ink: #e9eef5; --rack-soft: #93a6bd; --live: #4cc07f; --wait: #e0a94a;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--ground); color: var(--ink); font: 17px/1.6 var(--sans); }
+a { color: inherit; }
+.wrap {
+  max-width: 1080px; margin: 0 auto;
+  padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px));
+}
+.label { font: 600 12px/1.2 var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+:focus-visible { outline: 3px solid var(--hdmi); outline-offset: 3px; border-radius: 6px; }
+
+/* Top bar */
+.top { background: var(--rack); color: var(--rack-ink); }
+.top .wrap { display: flex; align-items: center; gap: 12px; padding-block: 14px; }
+.top img { width: 30px; height: 30px; border-radius: 7px; }
+.top .name { font-weight: 700; text-decoration: none; }
+.top nav { margin-left: auto; display: flex; gap: 20px; font-size: 15px; }
+.top nav a { color: var(--rack-soft); text-decoration: none; }
+.top nav a:hover { color: var(--rack-ink); }
+
+/* Hero */
+.hero { background: var(--rack); color: var(--rack-ink); border-bottom: 4px solid var(--hdmi); }
+.hero .wrap { display: grid; grid-template-columns: 1fr 1.1fr; gap: 40px; align-items: center; padding-block: 40px 56px; }
+.hero > .wrap > * { min-width: 0; }
+.hero .label { color: var(--rack-soft); }
+.hero h1 { font-size: clamp(42px, 6.4vw, 68px); line-height: 1; letter-spacing: -.03em; margin: 14px 0 18px; text-wrap: balance; }
+.hero p.lede { font-size: 20px; color: var(--rack-soft); margin: 0 0 28px; max-width: 30em; }
+.hero p.lede b { color: var(--rack-ink); font-weight: 600; }
+.cta { display: flex; flex-wrap: wrap; gap: 12px; }
+.btn {
+  display: inline-flex; flex-direction: column; align-items: flex-start; gap: 3px; padding: 12px 18px; border-radius: 10px;
+  font-weight: 650; font-size: 16px; text-decoration: none; line-height: 1.2;
+}
+.btn small { display: block; font: 500 12px/1.2 var(--sans); opacity: .8; }
+.btn.primary { background: var(--hdmi); color: #fff; }
+.btn.primary:hover { background: #cf650a; }
+.btn.ghost { border: 1.5px solid var(--rack-soft); color: var(--rack-ink); }
+.btn.ghost:hover { border-color: var(--rack-ink); }
+.patch { width: 100%; height: auto; display: block; }
+.patch .box { fill: #1b3350; stroke: #3a5677; }
+.patch .hd { fill: #24456b; }
+.patch text { font-family: var(--mono); fill: #dfe7f1; }
+.patch .dim { fill: #8ea3bb; }
+.patch path { fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+@media (prefers-reduced-motion: no-preference) {
+  .patch path { stroke-dasharray: 600; stroke-dashoffset: 0; animation: run 1.6s ease-out both; }
+  .patch path:nth-of-type(2) { animation-delay: .15s; } .patch path:nth-of-type(3) { animation-delay: .3s; }
+  .patch path:nth-of-type(4) { animation-delay: .45s; } .patch path:nth-of-type(5) { animation-delay: .6s; }
+  @keyframes run { from { stroke-dashoffset: 600; } to { stroke-dashoffset: 0; } }
+}
+
+/* Get it: one row per platform, like labelled rack ports */
+section { padding-block: 56px 8px; }
+h2 { font-size: clamp(26px, 3.4vw, 34px); letter-spacing: -.02em; line-height: 1.15; margin: 8px 0 22px; text-wrap: balance; }
+.get { display: grid; gap: 0; background: var(--panel); border: 1px solid var(--rule); border-radius: 14px; overflow: hidden; }
+.row { display: grid; grid-template-columns: 170px 1fr auto; gap: 18px; align-items: center; padding: 18px 22px; border-top: 1px solid var(--rule); }
+.row:first-child { border-top: 0; }
+.row > * { min-width: 0; }
+.row .plat { font-weight: 700; font-size: 18px; }
+.row .plat .label { display: block; color: var(--ink-soft); margin-top: 4px; font-weight: 500; }
+.row p { margin: 0; color: var(--ink-soft); font-size: 15px; }
+.status { display: inline-flex; align-items: center; gap: 7px; font: 600 12px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; }
+.status::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+.status.live { color: var(--live); }
+.status.wait { color: var(--wait); }
+.row .btn.store { background: var(--ink); color: var(--ground); white-space: nowrap; }
+.row .btn.store:hover { opacity: .88; }
+.row .soon { font-size: 14px; color: var(--ink-soft); white-space: nowrap; }
+
+/* Show the app */
+.media { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.media figure { margin: 0; }
+.media img { width: 100%; height: auto; display: block; border-radius: 18px; border: 1px solid var(--rule); }
+.media figcaption { margin-top: 10px; font-size: 15px; color: var(--ink-soft); }
+.media figcaption b { color: var(--ink); }
+.wide { margin-top: 18px; }
+.wide img, .wide video { width: 100%; height: auto; display: block; border-radius: 14px; border: 1px solid var(--rule); background: var(--rack); }
+.wide video { aspect-ratio: 16 / 9; }
+
+/* What it does */
+.does { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 40px; }
+.does div { padding-block: 18px; border-top: 1px solid var(--rule); }
+.does h3 { margin: 0 0 4px; font-size: 18px; }
+.does p { margin: 0; color: var(--ink-soft); font-size: 16px; max-width: 34em; }
+.does .label { color: var(--hdmi); }
+
+.privacy { background: var(--panel); border: 1px solid var(--rule); border-radius: 14px; padding: 22px 24px; }
+.privacy p { margin: 0; max-width: 46em; color: var(--ink-soft); }
+.privacy a { color: var(--ink); }
+
+footer { margin-top: 56px; border-top: 1px solid var(--rule); color: var(--ink-soft); font-size: 14px; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; padding-block: 22px 40px; }
+footer a { color: var(--ink-soft); }
+
+@media (max-width: 860px) {
+  .hero .wrap { grid-template-columns: 1fr; gap: 28px; }
+  .row { grid-template-columns: 1fr auto; }
+  .row p { grid-column: 1 / -1; grid-row: 2; }
+  .does { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .top nav { gap: 14px; font-size: 14px; }
+  .media { grid-template-columns: 1fr 1fr; }
+  .media figure:last-child { display: none; }
+  .row { grid-template-columns: 1fr; }
+  .row .btn.store, .row .soon { justify-self: start; }
+}
+</style>
 </head>
 <body>
-<header class="site"><div class="wrap">
+<header class="top"><div class="wrap">
   <img src="icon.png" alt=""><a class="name" href="./">AV Patchwork</a>
-  <nav><a href="./" aria-current="page">Home</a><a href="support.html">Support</a><a href="privacy.html">Privacy</a></nav>
+  <nav><a href="#get">Download</a><a href="support.html">Support</a><a href="privacy.html">Privacy</a></nav>
 </div></header>
 
-<section class="hero"><div class="wrap">
-  <img src="icon.png" alt="AV Patchwork app icon">
+<div class="hero"><div class="wrap">
   <div>
+    <span class="label">For live-event AV crews</span>
     <h1>Plan the signal.</h1>
-    <p>Wiring diagrams, cable lists and gear plans for AV crews. For iPhone, iPad and Mac.</p>
-    <span class="badge">Coming soon to the App Store</span>
+    <p class="lede">Paste an AV order and get a <b>patched wiring diagram</b>, the <b>cable pick list</b> and the adapters you'll need, before the truck is loaded.</p>
+    <div class="cta">
+      <a class="btn primary" href="https://apps.microsoft.com/detail/9N6502GK0PBZ" rel="noopener">Get it for Windows<small>Microsoft Store · free</small></a>
+      <a class="btn ghost" href="https://testflight.apple.com/join/TtqjZrHf" rel="noopener">Try the iPhone, iPad &amp; Mac beta<small>TestFlight · free</small></a>
+    </div>
+  </div>
+  <svg class="patch" viewBox="0 0 520 300" role="img" aria-label="Cables in HDMI, SDI, audio and DMX colors running from a laptop, a camera and two mics into a switcher and an audio console">
+    <rect class="box" x="10" y="20" width="130" height="58" rx="7"/><rect class="hd" x="10" y="20" width="130" height="20" rx="7"/>
+    <text x="20" y="35" font-size="11" font-weight="700">LAPTOP 1</text><text x="20" y="64" font-size="10" class="dim">HDMI OUT</text>
+    <rect class="box" x="10" y="96" width="130" height="58" rx="7"/><rect class="hd" x="10" y="96" width="130" height="20" rx="7"/>
+    <text x="20" y="111" font-size="11" font-weight="700">CAMERA 1</text><text x="20" y="140" font-size="10" class="dim">SDI OUT</text>
+    <rect class="box" x="10" y="172" width="130" height="44" rx="7"/><rect class="hd" x="10" y="172" width="130" height="20" rx="7"/>
+    <text x="20" y="187" font-size="11" font-weight="700">MIC 1</text><text x="20" y="208" font-size="10" class="dim">XLR</text>
+    <rect class="box" x="10" y="232" width="130" height="44" rx="7"/><rect class="hd" x="10" y="232" width="130" height="20" rx="7"/>
+    <text x="20" y="247" font-size="11" font-weight="700">MIC 2</text><text x="20" y="268" font-size="10" class="dim">XLR</text>
+
+    <rect class="box" x="300" y="20" width="150" height="104" rx="7"/><rect class="hd" x="300" y="20" width="150" height="20" rx="7"/>
+    <text x="310" y="35" font-size="11" font-weight="700">VIDEO SWITCHER</text>
+    <text x="310" y="64" font-size="10" class="dim">HDMI IN 1</text><text x="310" y="100" font-size="10" class="dim">SDI IN 2</text>
+    <text x="440" y="82" font-size="10" class="dim" text-anchor="end">PGM OUT</text>
+    <rect class="box" x="300" y="160" width="150" height="116" rx="7"/><rect class="hd" x="300" y="160" width="150" height="20" rx="7"/>
+    <text x="310" y="175" font-size="11" font-weight="700">AUDIO CONSOLE</text>
+    <text x="310" y="208" font-size="10" class="dim">CH 1</text><text x="310" y="232" font-size="10" class="dim">CH 2</text>
+    <text x="440" y="262" font-size="10" class="dim" text-anchor="end">DMX</text>
+
+    <path d="M140 60 H215 V60 H300" stroke="var(--hdmi)"/>
+    <path d="M140 136 H232 V96 H300" stroke="var(--sdi)"/>
+    <path d="M140 204 H249 V204 H300" stroke="var(--xlr)"/>
+    <path d="M140 264 H266 V228 H300" stroke="var(--xlr)"/>
+    <circle cx="140" cy="60" r="5" fill="var(--hdmi)"/><circle cx="300" cy="60" r="5" fill="var(--hdmi)"/>
+    <circle cx="140" cy="136" r="5" fill="var(--sdi)"/><circle cx="300" cy="96" r="5" fill="var(--sdi)"/>
+    <circle cx="140" cy="204" r="5" fill="var(--xlr)"/><circle cx="300" cy="204" r="5" fill="var(--xlr)"/>
+    <circle cx="140" cy="264" r="5" fill="var(--xlr)"/><circle cx="300" cy="228" r="5" fill="var(--xlr)"/>
+    <circle cx="450" cy="78" r="5" fill="var(--hdmi)"/><circle cx="450" cy="258" r="5" fill="var(--dmx)"/>
+    <rect x="196" y="51" width="38" height="16" rx="3" fill="#0f1d2e" stroke="var(--hdmi)" stroke-width=".8"/>
+    <text x="215" y="62.5" font-size="9" font-weight="700" text-anchor="middle" style="fill:var(--hdmi)">HDMI</text>
+    <rect x="252" y="128" width="30" height="16" rx="3" fill="#0f1d2e" stroke="var(--sdi)" stroke-width=".8"/>
+    <text x="267" y="139.5" font-size="9" font-weight="700" text-anchor="middle" style="fill:var(--sdi)">SDI</text>
+  </svg>
+</div></div>
+
+<main>
+<section id="get"><div class="wrap">
+  <span class="label" style="color:var(--hdmi)">Download</span>
+  <h2>Free on Windows today. iPhone, iPad and Mac in public beta.</h2>
+  <div class="get">
+    <div class="row">
+      <div class="plat">Windows<span class="label">10 and 11</span></div>
+      <p><span class="status live">Live</span>&ensp;Full app from the Microsoft Store.</p>
+      <a class="btn store" href="https://apps.microsoft.com/detail/9N6502GK0PBZ" rel="noopener">Microsoft Store</a>
+    </div>
+    <div class="row">
+      <div class="plat">iPhone, iPad, Mac<span class="label">Public beta</span></div>
+      <p><span class="status live">Live</span>&ensp;Join the beta through Apple's TestFlight app. The App Store release is in review.</p>
+      <a class="btn store" href="https://testflight.apple.com/join/TtqjZrHf" rel="noopener">Join on TestFlight</a>
+    </div>
+    <div class="row">
+      <div class="plat">Android<span class="label">Phones and tablets</span></div>
+      <p><span class="status wait">Coming soon</span>&ensp;On its way to Google Play.</p>
+      <span class="soon">Not yet available</span>
+    </div>
   </div>
 </div></section>
 
-<main><div class="wrap">
-  <video class="teaser" src="img/teaser.mp4" poster="img/teaser.jpg" controls playsinline preload="metadata"
-    aria-label="20-second AV Patchwork teaser: paste an order, get a patched diagram and cable pick list"></video>
-  <div class="shots" aria-label="Screenshots">
-    <img src="img/1-diagram.jpg" alt="A wiring diagram with a switcher, projector, LED wall and audio console" loading="lazy">
-    <img src="img/2-import.jpg" alt="Importing a pasted AV order" loading="lazy">
-    <img src="img/3-lists.jpg" alt="Pick list of cables and adapters" loading="lazy">
+<section><div class="wrap">
+  <span class="label" style="color:var(--hdmi)">The app</span>
+  <h2>From a pasted order to the cables on the cart.</h2>
+  <div class="media">
+    <figure><img src="img/1-diagram.jpg" alt="A wiring diagram with a switcher, projector, LED wall and audio console" loading="lazy" width="506" height="1100"><figcaption><b>Diagram.</b> Every port, every cable, color-coded by signal.</figcaption></figure>
+    <figure><img src="img/2-import.jpg" alt="Importing a pasted AV order" loading="lazy" width="506" height="1100"><figcaption><b>Import.</b> Paste a gear list; the app finds the models.</figcaption></figure>
+    <figure><img src="img/3-lists.jpg" alt="Pick list of cables and adapters" loading="lazy" width="506" height="1100"><figcaption><b>Lists.</b> Cables, adapters and lengths to pull.</figcaption></figure>
   </div>
-  <img class="mac" src="img/mac-diagram.jpg" alt="AV Patchwork on the Mac" loading="lazy">
-
-  <h2>What it does</h2>
-  <div class="grid">
-    <div class="card"><h3>Draw the system</h3><p>Add switchers, displays, consoles, speakers and lights from a catalog of thousands of models, then connect port to port.</p></div>
-    <div class="card"><h3>Import an AV order</h3><p>Paste or type a gear list. The app finds the gear and lays out a first diagram. Imports are never saved.</p></div>
-    <div class="card"><h3>Pull the right cables</h3><p>Pick lists, patch lists and adapters for one room or the whole show, with lengths in feet or meters.</p></div>
-    <div class="card"><h3>Share it</h3><p>Export a PDF, a spreadsheet, or a diagram image at 4K or original size.</p></div>
+  <div class="wide">
+    <video src="img/teaser.mp4" poster="img/teaser.jpg" controls playsinline preload="none"
+      aria-label="20-second AV Patchwork teaser: paste an order, get a patched diagram and cable pick list"></video>
   </div>
+</div></section>
 
-  <h2>Your work stays yours</h2>
-  <p>Projects sync through your own iCloud, or stay on your device. There's no account, and client names or pricing on imported orders are never kept. Read the <a href="privacy.html">privacy policy</a>.</p>
-</div></main>
+<section><div class="wrap">
+  <span class="label" style="color:var(--hdmi)">What it does</span>
+  <h2>Built around how a show actually gets wired.</h2>
+  <div class="does">
+    <div><span class="label">Gear</span><h3>Thousands of real models</h3><p>Switchers, displays, projectors, consoles, stage boxes, speakers and lights, each with its real ports.</p></div>
+    <div><span class="label">Cables</span><h3>Adapters worked out for you</h3><p>Connect port to port. HDMI to SDI, XLR to TRS, long runs to fiber: the app names the cable or converter.</p></div>
+    <div><span class="label">Lighting</span><h3>DMX patch</h3><p>Address fixtures by universe and channel, with runs kept to sensible lengths.</p></div>
+    <div><span class="label">Export</span><h3>Share it with the crew</h3><p>PDF, spreadsheet, or a diagram image at 4K. Lengths in feet or meters.</p></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="privacy">
+    <span class="label" style="color:var(--hdmi)">Your work stays yours</span>
+    <p style="margin-top:8px">There's no account to make. Projects stay on your device, or in your own iCloud on Apple devices. Client names and pricing on imported orders are never kept. Read the <a href="privacy.html">privacy policy</a>.</p>
+  </div>
+</div></section>
+</main>
 
 <footer><div class="wrap">
   <span>© <span id="y">2026</span> AV Patchwork</span>
