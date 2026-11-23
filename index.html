@@ -31,6 +31,7 @@
   --rack-soft: #9fb0c4;
   --live: #1f8f4e;
   --wait: #a2690b;
+  --signal: #1f6feb;       /* the only color for things you can click (family design rule) */
   --hdmi: #e5730d; --sdi: #2f7de1; --xlr: #d23b3b; --dmx: #c79a12; --net: #2aa39a;
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "SF Pro Text", Roboto, "Helvetica Neue", Arial, sans-serif;
   --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
@@ -56,7 +57,7 @@ a { color: inherit; }
   padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px));
 }
 .label { font: 600 12px/1.2 var(--mono); letter-spacing: .08em; text-transform: uppercase; }
-:focus-visible { outline: 3px solid var(--hdmi); outline-offset: 3px; border-radius: 6px; }
+:focus-visible { outline: 3px solid var(--signal); outline-offset: 3px; border-radius: 6px; }
 
 /* Top bar */
 .top { background: var(--rack); color: var(--rack-ink); }
@@ -81,8 +82,8 @@ a { color: inherit; }
   font-weight: 650; font-size: 16px; text-decoration: none; line-height: 1.2;
 }
 .btn small { display: block; font: 500 12px/1.2 var(--sans); opacity: .8; }
-.btn.primary { background: var(--hdmi); color: #fff; }
-.btn.primary:hover { background: #cf650a; }
+.btn.primary { background: var(--signal); color: #fff; }
+.btn.primary:hover { background: #1a5fd0; }
 .btn.ghost { border: 1.5px solid var(--rack-soft); color: var(--rack-ink); }
 .btn.ghost:hover { border-color: var(--rack-ink); }
 .patch { width: 100%; height: auto; display: block; }
@@ -98,6 +99,32 @@ a { color: inherit; }
   @keyframes run { from { stroke-dashoffset: 600; } to { stroke-dashoffset: 0; } }
 }
 
+/* Parallax: three planes in the hero (grid at the back, cables in the middle, gear in front).
+   app.js-free: a few lines at the end of the page set --p (scroll) and --mx/--my (pointer). */
+.hero { position: relative; overflow: hidden; }
+.hero::before {
+  content: ""; position: absolute; inset: -120px 0; pointer-events: none;
+  background-image: linear-gradient(rgba(255,255,255,.055) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.055) 1px, transparent 1px);
+  background-size: 32px 32px;
+  transform: translate3d(calc(var(--mx, 0) * -6px), calc(var(--p, 0) * 60px + var(--my, 0) * -4px), 0);
+}
+.hero .wrap { position: relative; }
+.patch .plane-cables { transform: translate(calc(var(--mx, 0) * 5px), calc(var(--my, 0) * 3px + var(--p, 0) * -18px)); }
+.patch .plane-gear { transform: translate(calc(var(--mx, 0) * 11px), calc(var(--my, 0) * 7px + var(--p, 0) * -42px)); }
+.patch .plane-cables, .patch .plane-gear { transition: transform .25s ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  .hero::before, .patch .plane-cables, .patch .plane-gear, .family img { transform: none !important; }
+}
+
+/* Family apps: icons sit at slightly different depths and drift apart as you scroll past */
+.family { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.family article { background: var(--panel); border: 1px solid var(--rule); border-radius: 14px; padding: 22px; }
+.family img { width: 96px; height: 96px; border-radius: 22px; display: block; box-shadow: 0 14px 28px rgba(8, 20, 40, .28);
+  transform: translate3d(0, calc(var(--d, 0) * var(--f, 0) * 1px), 0); transition: transform .2s ease-out; }
+.family h3 { margin: 18px 0 4px; font-size: 20px; }
+.family p { margin: 0; color: var(--ink-soft); font-size: 15px; }
+.family-note { margin: 14px 0 0; color: var(--ink-soft); font-size: 15px; }
+
 /* Get it: one row per platform, like labelled rack ports */
 section { padding-block: 56px 8px; }
 h2 { font-size: clamp(26px, 3.4vw, 34px); letter-spacing: -.02em; line-height: 1.15; margin: 8px 0 22px; text-wrap: balance; }
@@ -112,7 +139,7 @@ h2 { font-size: clamp(26px, 3.4vw, 34px); letter-spacing: -.02em; line-height: 1
 .status::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
 .status.live { color: var(--live); }
 .status.wait { color: var(--wait); }
-.row .btn.store { background: var(--ink); color: var(--ground); white-space: nowrap; }
+.row .btn.store { background: var(--signal); color: #fff; white-space: nowrap; }
 .row .btn.store:hover { opacity: .88; }
 .row .soon { font-size: 14px; color: var(--ink-soft); white-space: nowrap; }
 
@@ -135,7 +162,9 @@ h2 { font-size: clamp(26px, 3.4vw, 34px); letter-spacing: -.02em; line-height: 1
 
 .privacy { background: var(--panel); border: 1px solid var(--rule); border-radius: 14px; padding: 22px 24px; }
 .privacy p { margin: 0; max-width: 46em; color: var(--ink-soft); }
-.privacy a { color: var(--ink); }
+.privacy a { color: var(--signal); }
+main a:not(.btn) { color: var(--signal); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) main a:not(.btn) { color: #4c9bff; } }
 
 footer { margin-top: 56px; border-top: 1px solid var(--rule); color: var(--ink-soft); font-size: 14px; }
 footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; padding-block: 22px 40px; }
@@ -146,6 +175,7 @@ footer a { color: var(--ink-soft); }
   .row { grid-template-columns: 1fr auto; }
   .row p { grid-column: 1 / -1; grid-row: 2; }
   .does { grid-template-columns: 1fr; }
+  .family { grid-template-columns: 1fr; }
 }
 @media (max-width: 420px) { .top nav .dl { display: none; } }
 @media (max-width: 560px) {
@@ -161,7 +191,7 @@ footer a { color: var(--ink-soft); }
 <body>
 <header class="top"><div class="wrap">
   <a class="logo" href="./"><img src="img/logo-on-dark.png" alt="AV Patchwork" width="165" height="44"></a>
-  <nav><a class="dl" href="#get">Download</a><a href="support.html">Support</a><a href="privacy.html">Privacy</a></nav>
+  <nav><a class="dl" href="#get">Download</a><a href="#family">Apps</a><a href="support.html">Support</a><a href="privacy.html">Privacy</a></nav>
 </div></header>
 
 <div class="hero"><div class="wrap">
@@ -175,6 +205,22 @@ footer a { color: var(--ink-soft); }
     </div>
   </div>
   <svg class="patch" viewBox="0 0 520 300" role="img" aria-label="Cables in HDMI, SDI, audio and DMX colors running from a laptop, a camera and two mics into a switcher and an audio console">
+    <g class="plane-cables">
+    <path d="M140 60 H215 V60 H300" stroke="var(--hdmi)"/>
+    <path d="M140 136 H232 V96 H300" stroke="var(--sdi)"/>
+    <path d="M140 204 H249 V204 H300" stroke="var(--xlr)"/>
+    <path d="M140 264 H266 V228 H300" stroke="var(--xlr)"/>
+    <circle cx="140" cy="60" r="5" fill="var(--hdmi)"/><circle cx="300" cy="60" r="5" fill="var(--hdmi)"/>
+    <circle cx="140" cy="136" r="5" fill="var(--sdi)"/><circle cx="300" cy="96" r="5" fill="var(--sdi)"/>
+    <circle cx="140" cy="204" r="5" fill="var(--xlr)"/><circle cx="300" cy="204" r="5" fill="var(--xlr)"/>
+    <circle cx="140" cy="264" r="5" fill="var(--xlr)"/><circle cx="300" cy="228" r="5" fill="var(--xlr)"/>
+    <circle cx="450" cy="78" r="5" fill="var(--hdmi)"/><circle cx="450" cy="258" r="5" fill="var(--dmx)"/>
+    <rect x="196" y="51" width="38" height="16" rx="3" fill="#0f1d2e" stroke="var(--hdmi)" stroke-width=".8"/>
+    <text x="215" y="62.5" font-size="9" font-weight="700" text-anchor="middle" style="fill:var(--hdmi)">HDMI</text>
+    <rect x="252" y="128" width="30" height="16" rx="3" fill="#0f1d2e" stroke="var(--sdi)" stroke-width=".8"/>
+    <text x="267" y="139.5" font-size="9" font-weight="700" text-anchor="middle" style="fill:var(--sdi)">SDI</text>
+    </g>
+    <g class="plane-gear">
     <rect class="box" x="10" y="20" width="130" height="58" rx="7"/><rect class="hd" x="10" y="20" width="130" height="20" rx="7"/>
     <text x="20" y="35" font-size="11" font-weight="700">LAPTOP 1</text><text x="20" y="64" font-size="10" class="dim">HDMI OUT</text>
     <rect class="box" x="10" y="96" width="130" height="58" rx="7"/><rect class="hd" x="10" y="96" width="130" height="20" rx="7"/>
@@ -193,19 +239,7 @@ footer a { color: var(--ink-soft); }
     <text x="310" y="208" font-size="10" class="dim">CH 1</text><text x="310" y="232" font-size="10" class="dim">CH 2</text>
     <text x="440" y="262" font-size="10" class="dim" text-anchor="end">DMX</text>
 
-    <path d="M140 60 H215 V60 H300" stroke="var(--hdmi)"/>
-    <path d="M140 136 H232 V96 H300" stroke="var(--sdi)"/>
-    <path d="M140 204 H249 V204 H300" stroke="var(--xlr)"/>
-    <path d="M140 264 H266 V228 H300" stroke="var(--xlr)"/>
-    <circle cx="140" cy="60" r="5" fill="var(--hdmi)"/><circle cx="300" cy="60" r="5" fill="var(--hdmi)"/>
-    <circle cx="140" cy="136" r="5" fill="var(--sdi)"/><circle cx="300" cy="96" r="5" fill="var(--sdi)"/>
-    <circle cx="140" cy="204" r="5" fill="var(--xlr)"/><circle cx="300" cy="204" r="5" fill="var(--xlr)"/>
-    <circle cx="140" cy="264" r="5" fill="var(--xlr)"/><circle cx="300" cy="228" r="5" fill="var(--xlr)"/>
-    <circle cx="450" cy="78" r="5" fill="var(--hdmi)"/><circle cx="450" cy="258" r="5" fill="var(--dmx)"/>
-    <rect x="196" y="51" width="38" height="16" rx="3" fill="#0f1d2e" stroke="var(--hdmi)" stroke-width=".8"/>
-    <text x="215" y="62.5" font-size="9" font-weight="700" text-anchor="middle" style="fill:var(--hdmi)">HDMI</text>
-    <rect x="252" y="128" width="30" height="16" rx="3" fill="#0f1d2e" stroke="var(--sdi)" stroke-width=".8"/>
-    <text x="267" y="139.5" font-size="9" font-weight="700" text-anchor="middle" style="fill:var(--sdi)">SDI</text>
+    </g>
   </svg>
 </div></div>
 
@@ -257,6 +291,17 @@ footer a { color: var(--ink-soft); }
   </div>
 </div></section>
 
+<section id="family"><div class="wrap">
+  <span class="label" style="color:var(--hdmi)">More from AV Patchwork</span>
+  <h2>Three small tools for show day.</h2>
+  <div class="family">
+    <article style="--d:-.9"><img src="img/family-showclock.png" alt="" width="96" height="96" loading="lazy"><h3>Show Clock</h3><p>A stage timer and speaker clock for any screen: HDMI, AirPlay, nearby devices or a web browser.</p></article>
+    <article style="--d:.5"><img src="img/family-dmxpocket.png" alt="" width="96" height="96" loading="lazy"><h3>DMX Pocket</h3><p>Start addresses with no overlaps, and the DIP switch settings for each fixture.</p></article>
+    <article style="--d:-.3"><img src="img/family-cablelabeler.png" alt="" width="96" height="96" loading="lazy"><h3>Cable Labeler</h3><p>Matching labels for both ends of every cable, printed or saved as a PDF.</p></article>
+  </div>
+  <p class="family-note">Free, coming to iPhone, iPad, Mac, Android and Windows.</p>
+</div></section>
+
 <section><div class="wrap">
   <div class="privacy">
     <span class="label" style="color:var(--hdmi)">Your work stays yours</span>
@@ -269,6 +314,34 @@ footer a { color: var(--ink-soft); }
   <span>© <span id="y">2026</span> AV Patchwork</span>
   <a href="support.html">Support</a><a href="privacy.html">Privacy</a>
 </div></footer>
-<script>document.getElementById("y").textContent = new Date().getFullYear();</script>
+<script>
+document.getElementById("y").textContent = new Date().getFullYear();
+// Parallax: scroll progress through the hero (--p), pointer position over it (--mx/--my), and each family card's
+// distance from the middle of the screen (--f). Skipped entirely when reduced motion is on.
+(() => {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const hero = document.querySelector(".hero"), cards = [...document.querySelectorAll(".family article")];
+  let queued = false;
+  const frame = () => {
+    queued = false;
+    const h = hero.offsetHeight || 1;
+    hero.style.setProperty("--p", Math.min(1, Math.max(0, scrollY / h)).toFixed(3));
+    for (const c of cards) {
+      const r = c.getBoundingClientRect();
+      c.style.setProperty("--f", ((r.top + r.height / 2 - innerHeight / 2) / 10).toFixed(1));
+    }
+  };
+  const ask = () => { if (!queued) { queued = true; requestAnimationFrame(frame); } };
+  addEventListener("scroll", ask, { passive: true }); addEventListener("resize", ask); frame();
+  if (matchMedia("(pointer: fine)").matches) {
+    hero.addEventListener("pointermove", e => {
+      const r = hero.getBoundingClientRect();
+      hero.style.setProperty("--mx", ((e.clientX - r.left) / r.width * 2 - 1).toFixed(3));
+      hero.style.setProperty("--my", ((e.clientY - r.top) / r.height * 2 - 1).toFixed(3));
+    });
+    hero.addEventListener("pointerleave", () => { hero.style.setProperty("--mx", 0); hero.style.setProperty("--my", 0); });
+  }
+})();
+</script>
 </body>
 </html>
