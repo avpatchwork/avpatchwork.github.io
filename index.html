@@ -113,14 +113,14 @@ a { color: inherit; }
 .patch .plane-gear { transform: translate(calc(var(--mx, 0) * 11px), calc(var(--my, 0) * 7px + var(--p, 0) * -42px)); }
 .patch .plane-cables, .patch .plane-gear { transition: transform .25s ease-out; }
 @media (prefers-reduced-motion: reduce) {
-  .hero::before, .patch .plane-cables, .patch .plane-gear, .family img { transform: none !important; }
+  .hero::before, .patch .plane-cables, .patch .plane-gear { transform: none !important; }
 }
 
-/* Family apps: icons sit at slightly different depths and drift apart as you scroll past */
+/* Family apps: icons stay still (owner's call); depth comes from the hero's background layer */
 .family { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .family article { background: var(--panel); border: 1px solid var(--rule); border-radius: 14px; padding: 22px; }
 .family img { width: 96px; height: 96px; border-radius: 22px; display: block; box-shadow: 0 14px 28px rgba(8, 20, 40, .28);
-  transform: translate3d(0, calc(var(--d, 0) * var(--f, 0) * 1px), 0); transition: transform .2s ease-out; }
+}
 .family h3 { margin: 18px 0 4px; font-size: 20px; }
 .family p { margin: 0; color: var(--ink-soft); font-size: 15px; }
 .family-note { margin: 14px 0 0; color: var(--ink-soft); font-size: 15px; }
@@ -295,9 +295,9 @@ footer a { color: var(--ink-soft); }
   <span class="label" style="color:var(--hdmi)">More from AV Patchwork</span>
   <h2>Three small tools for show day.</h2>
   <div class="family">
-    <article style="--d:-.9"><img src="img/family-showclock.png" alt="" width="96" height="96" loading="lazy"><h3>Show Clock</h3><p>A stage timer and speaker clock for any screen: HDMI, AirPlay, nearby devices or a web browser.</p></article>
-    <article style="--d:.5"><img src="img/family-dmxpocket.png" alt="" width="96" height="96" loading="lazy"><h3>DMX Pocket</h3><p>Start addresses with no overlaps, and the DIP switch settings for each fixture.</p></article>
-    <article style="--d:-.3"><img src="img/family-cablelabeler.png" alt="" width="96" height="96" loading="lazy"><h3>Cable Labeler</h3><p>Matching labels for both ends of every cable, printed or saved as a PDF.</p></article>
+    <article><img src="img/family-showclock.png" alt="" width="96" height="96" loading="lazy"><h3>Show Clock</h3><p>A stage timer and speaker clock for any screen: HDMI, AirPlay, nearby devices or a web browser.</p></article>
+    <article><img src="img/family-dmxpocket.png" alt="" width="96" height="96" loading="lazy"><h3>DMX Pocket</h3><p>Start addresses with no overlaps, and the DIP switch settings for each fixture.</p></article>
+    <article><img src="img/family-cablelabeler.png" alt="" width="96" height="96" loading="lazy"><h3>Cable Labeler</h3><p>Matching labels for both ends of every cable, printed or saved as a PDF.</p></article>
   </div>
   <p class="family-note">Free, coming to iPhone, iPad, Mac, Android and Windows.</p>
 </div></section>
@@ -316,20 +316,16 @@ footer a { color: var(--ink-soft); }
 </div></footer>
 <script>
 document.getElementById("y").textContent = new Date().getFullYear();
-// Parallax: scroll progress through the hero (--p), pointer position over it (--mx/--my), and each family card's
-// distance from the middle of the screen (--f). Skipped entirely when reduced motion is on.
+// Parallax: scroll progress through the hero (--p) and pointer position over it (--mx/--my).
+// Skipped entirely when reduced motion is on.
 (() => {
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  const hero = document.querySelector(".hero"), cards = [...document.querySelectorAll(".family article")];
+  const hero = document.querySelector(".hero");
   let queued = false;
   const frame = () => {
     queued = false;
     const h = hero.offsetHeight || 1;
     hero.style.setProperty("--p", Math.min(1, Math.max(0, scrollY / h)).toFixed(3));
-    for (const c of cards) {
-      const r = c.getBoundingClientRect();
-      c.style.setProperty("--f", ((r.top + r.height / 2 - innerHeight / 2) / 10).toFixed(1));
-    }
   };
   const ask = () => { if (!queued) { queued = true; requestAnimationFrame(frame); } };
   addEventListener("scroll", ask, { passive: true }); addEventListener("resize", ask); frame();
